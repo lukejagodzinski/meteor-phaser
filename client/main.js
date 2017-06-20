@@ -5,38 +5,38 @@ import { GAME_WIDTH, GAME_HEIGHT } from '/imports/config';
 import Players from '/imports/Players';
 import './main.html';
 
-window.PIXI = require('phaser-ce/build/custom/pixi');
-window.p2 = require('phaser-ce/build/custom/p2');
-window.Phaser = require('phaser-ce/build/custom/phaser-split');
+window.PIXI = require('phaser/build/custom/pixi');
+window.p2 = require('phaser/build/custom/p2');
+window.Phaser = require('phaser/build/custom/phaser-split');
 
 const data = {
   game: null,
-  player: null,
-  players: {}
+  playerSprite: null,
+  playersSprites: {}
 };
 
 const createPlayer = (id, doc) => {
-  const player = data.game.add.sprite(doc.x, doc.y, 'player');
-  player.id = id;
-  data.players[id] = player;
+  const playerSprite = data.game.add.sprite(doc.x, doc.y, 'player');
+  playerSprite.id = id;
+  data.playersSprites[id] = playerSprite;
   // If it's me.
   if (id === Meteor.connection._lastSessionId) {
-    data.player = player;
+    data.playerSprite = playerSprite;
   }
 };
 
 const updatePlayer = (id, fields) => {
-  const player = data.players[id];
-  if (player) {
-    if (fields.x) player.x = fields.x;
-    if (fields.y) player.y = fields.y;
+  const playerSprite = data.playersSprites[id];
+  if (playerSprite) {
+    if (fields.x) playerSprite.x = fields.x;
+    if (fields.y) playerSprite.y = fields.y;
   }
 };
 
 const removePlayer = (id) => {
-  const player = data.players[id];
-  player.destroy();
-  delete data.players[id];
+  const playerSprite = data.playersSprites[id];
+  playerSprite.destroy();
+  delete data.playersSprites[id];
 }
 
 const preload = () => {
@@ -63,13 +63,13 @@ const create = () => {
 }
 
 const sendPlayerData = throttle(function() {
-  if (data.player) {
+  if (data.playerSprite) {
     Players.update({
       _id: Meteor.connection._lastSessionId
     }, {
       $set: {
-        x: data.player.position.x,
-        y: data.player.position.y
+        x: data.playerSprite.position.x,
+        y: data.playerSprite.position.y
       }
     });
   }
@@ -77,16 +77,16 @@ const sendPlayerData = throttle(function() {
 
 const update = () => {
   if (data.cursors.left.isDown) {
-    data.player.x -= 2;
+    data.playerSprite.x -= 2;
   }
   else if (data.cursors.right.isDown) {
-    data.player.x += 2;
+    data.playerSprite.x += 2;
   }
   if (data.cursors.up.isDown) {
-    data.player.y -= 2;
+    data.playerSprite.y -= 2;
   }
   else if (data.cursors.down.isDown) {
-    data.player.y += 2;
+    data.playerSprite.y += 2;
   }
 
   sendPlayerData();
